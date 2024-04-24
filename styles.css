@@ -1,0 +1,215 @@
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #253941;
+    position: relative;
+}
+
+/* Añade la fuente personalizada */
+@font-face {
+    font-family: 'Tombstone';
+    src: url('fonts/Tombstone-FREE.otf') format('opentype');
+}
+
+/* Aplica la fuente a los elementos deseados */
+h1 {
+    font-family: 'Tombstone', sans-serif;
+    color: white;
+    font-size: 10vh;
+    line-height: 0.5vh;
+    font-weight: normal;
+}
+
+h2 {
+    font-family: 'Tombstone', sans-serif;
+    color: white;
+    font-size: 5vh;
+    font-weight: normal;
+}
+
+#start-screen,
+#game-over-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #253941;
+    z-index: 9;
+}
+
+#game-over-screen {
+    display: none;
+}
+
+#game-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    width: 70vh;
+    height: 70vh;
+    margin: auto;
+    background-color: #1f323c;
+}
+
+#game {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-image: url('img/fondo.png');
+    background-size: 100% auto; /* La imagen de fondo se ajustará al ancho del contenedor */
+    background-repeat: repeat-x; /* Repetir horizontalmente */
+    background-position: bottom; /* Alinear la imagen en la parte inferior del contenedor */
+}
+
+#floor {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 30px; /* Altura del piso */
+    background-color: #16242c; /* Color del piso */
+    z-index: 1; /* Asegura que el piso esté detrás del dinosaurio */
+}
+
+#dino {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    bottom: 30px; /* Ajusta la posición del dinosaurio encima del piso */
+    left: 50px;
+    transition: transform 0.2s ease-in-out;
+    z-index: 2; /* Asegura que el dinosaurio esté sobre el piso */
+}
+
+.obstacle {
+    position: absolute;
+    bottom: 30px; /* Ajusta la posición de los obstáculos encima del piso */
+    z-index: 2; /* Asegura que los obstáculos estén sobre el piso */
+}
+
+.obstacle.red {
+    width: 80px;
+    height: 90px;
+    position: absolute;
+}
+
+.obstacle.blue {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+}
+
+#buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+}
+
+.button {
+    background-color: #fff;
+    margin: 0 10px;
+    padding: 20px 20px;
+    font-size: 30px;
+    cursor: pointer;
+    font-family: 'Tombstone', sans-serif;
+    line-height: 0.5vh;
+    font-weight: normal;
+    box-shadow: 0px 5px 0px rgba(0, 0, 0, 0.3); /* Sombra paralela hacia abajo */
+    transition: box-shadow 0.3s ease; /* Agrega una transición suave */
+    border: none; /* Elimina el borde */
+}
+
+.button:active {
+    box-shadow: inset 0px 2.5px 0px rgba(0, 0, 0, 0.3); /* Sombra sobre la parte superior al presionar */
+}
+
+.action-button {
+    margin: 0 10px;
+    padding: 0; /* Quita el relleno para que la imagen de fondo se muestre correctamente */
+    width: 150px; /* Ancho del botón (tamaño exacto de la imagen de fondo) */
+    height: 80px; /* Alto del botón (tamaño exacto de la imagen de fondo) */
+    background-image: url('img/actionbutton0.png'); /* Imagen de fondo normal */
+    background-size: contain; /* Ajusta la imagen de fondo al tamaño del botón */
+    background-repeat: no-repeat; /* Evita que la imagen de fondo se repita */
+    background-color: transparent; /* Fondo transparente */
+    border: none;
+    cursor: pointer;
+    font-family: 'Tombstone', sans-serif;
+    line-height: 0.5vh;
+    font-weight: normal;
+    color: #fff;
+    font-size: 30px;
+}
+
+.action-button:active {
+    background-image: url('img/actionbutton1.png'); /* Cambia la imagen de fondo al presionar */
+}
+
+#game-container {
+    position: relative;
+    width: 70vh;
+    height: 70vh;
+    margin: auto;
+    background-color: #1f323c;
+
+    @media only screen and (max-width: 600px) {
+        width: 100%;
+        height: 100%;
+    }
+}
+
+#score-display {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+}
+
+#score-display img {
+    width: 100%; /* Ajusta el tamaño de la imagen según sea necesario */
+    height: auto;
+    margin-right: 10px; /* Ajusta el margen derecho según sea necesario */
+}
+
+#score {
+    color: white; /* Color del número del puntaje */
+    font-size: 30px; /* Tamaño del número del puntaje */
+    font-family: 'Tombstone', sans-serif;
+}
+
+.boss1 {
+    width: 90px;
+    height: 90px;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    z-index: 5;
+    background-image: url('img/raphael.gif'); /* Agrega el fondo animado */
+}
+
+
+.message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #15232c;
+    padding: 30px;
+    border-style: solid;
+    border-width: 4px;
+    border-color: #a7b5b6;
+    color: white;
+    text-align: center;
+    display: none; /* ocultar inicialmente */
+    z-index: 999;
+}
