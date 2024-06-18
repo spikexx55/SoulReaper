@@ -27,6 +27,7 @@ h2 {
     font-family: 'Tombstone', sans-serif;
     color: white;
     font-size: 5vh;
+    line-height: 0.5vh;
     font-weight: normal;
 }
 
@@ -154,6 +155,7 @@ h2 {
     background-image: url('img/actionbutton1.png'); /* Cambia la imagen de fondo al presionar */
 }
 
+
 #game-container {
     position: relative;
     width: 70vh;
@@ -182,25 +184,21 @@ h2 {
 }
 
 #score {
+    font-family: 'Tombstone', sans-serif;
     color: white; /* Color del número del puntaje */
     font-size: 30px; /* Tamaño del número del puntaje */
-    font-family: 'Tombstone', sans-serif;
 }
 
-.boss1 {
-    width: 90px;
-    height: 90px;
-    position: absolute;
-    bottom: 30px;
-    right: 30px;
-    z-index: 5;
-    background-image: url('img/raphael.gif'); /* Agrega el fondo animado */
+.action-button.highlight {
+    outline: 0px solid yellow; /* Añadir un borde amarillo al botón resaltado */
+    background-image: url('img/actionbutton0activo.png');
 }
 
-
-.message {
+.popup {
     position: fixed;
-    top: 50%;
+    font-family: 'Tombstone', sans-serif;
+    font-size: 30px;
+    top: 25%;
     left: 50%;
     transform: translate(-50%, -50%);
     background-color: #15232c;

@@ -3,25 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Soul reaper</title>
+<title>Soul Reaper</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <div id="start-screen">
-    <h1>Soul reaper</h1>
-    <img id="door" src="img/door.gif" alt="door">
+    <img id="door" style="width: 300px;" src="img/door-logo.gif" alt="door">
     <h2>Reap souls to open the door</h2>
     <button class="action-button" onclick="startGame()">Start</button>
 </div>
-
 <div id="game-over-screen">
     <h1>You have failed</h1>
     <h2>You have reaped <span id="game-over-score">0</span> souls</h2>
     <h2>They're not enough</h2>
     <button class="action-button" onclick="restartGame()">Try again</button>
 </div>
-
 <div id="game-container">
     <div id="game"></div>
     <img id="dino" src="img/reapermove.gif" alt="elreaper">
@@ -31,10 +27,13 @@
         <span id="score">0</span>
     </div>
 </div>
-
 <div id="buttons-container">
-    <button class="action-button" onclick="jump()">Jump</button>
-    <button class="action-button" onclick="attack()">Attack</button>
+    <button id="jump-button" class="action-button" onclick="jump()">Jump</button>
+    <button id="attack-button" class="action-button" onclick="attack()">Attack</button>
+</div>
+
+<div id="popup" class="popup">
+    <p id="popup-message"></p>
 </div>
 
 <audio id="jumpSound" src="sound/jump.wav"></audio>
@@ -42,13 +41,6 @@
 <audio id="deadSound" src="sound/dead.mp3"></audio>
 <audio id="startSound" src="sound/start.mp3"></audio>
 
-<!-- Boss Message -->
-<div id="boss-message" class="message">
-    <h2>Raphael:<br>Please stop, do not open that door</h2>
-    <button class="action-button" id="continue-button">Continue</button>
-</div>
-
 <script src="script.js"></script>
-
 </body>
 </html>

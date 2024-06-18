@@ -9,63 +9,102 @@ let obstacleSpeed = 5;
 let obstacleCount = 0;
 let gameInterval;
 let gameRunning = false;
-
-let bossFightActive = false;
-let boss1Health = 5;
-let boss1 = null;
-let bossMoveInterval;
-let bossMessageVisible = false;
+let buttonHighlighted = false;
+let firstRedObstacle = true;
+let firstBlueObstacle = true;
+let jumpButtonPressed = false; // Variable para seguimiento del botón de salto
+let attackButtonPressed = false; // Variable para seguimiento del botón de ataque
+let nextObstacleIsBlue = true; // Control de secuencia de colores
+let nextObstacleIsRed = false;
 
 function startGame() {
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('startSound').play();
     gameRunning = true;
-    gameInterval = setInterval(createObstacle, 2000);
-    if (score >= 2) {
-        startBossFight();
-    }
+    gameInterval = setInterval(() => {
+        if (!buttonHighlighted) {
+            createObstacle();
+        }
+    }, 2000);
 }
 
 function jump() {
     if (!isJumping && !isAttacking) {
-        isJumping = true;
-        dino.style.transform = 'translateY(-90px)';
-        setTimeout(() => {
-            dino.style.transform = 'translateY(0)';
-            isJumping = false;
-        }, 350);
-        document.getElementById('jumpSound').play();
+        const jumpButton = document.getElementById('jump-button');
+        if (jumpButton.classList.contains('highlight') || jumpButtonPressed) {
+            isJumping = true;
+            dino.style.transform = 'translateY(-90px)';
+            setTimeout(() => {
+                dino.style.transform = 'translateY(0)';
+                isJumping = false;
+            }, 350);
+
+            document.getElementById('jumpSound').play();
+            if (buttonHighlighted && !jumpButtonPressed) {
+                removeHighlight();
+                continueObstacleMovement();
+            }
+            jumpButtonPressed = true;
+        }
     }
 }
 
 function attack() {
     if (!isAttacking && !isJumping) {
-        isAttacking = true;
-        dino.src = 'img/reaperattack.gif';
-        setTimeout(() => {
-            dino.src = 'img/reapermove.gif';
-            isAttacking = false;
-        }, 500);
-        document.getElementById('attackSound').play();
+        const attackButton = document.getElementById('attack-button');
+        if (attackButton.classList.contains('highlight') || attackButtonPressed) {
+            isAttacking = true;
+            dino.src = 'img/reaperattack.gif';
+            setTimeout(() => {
+                dino.src = 'img/reapermove.gif';
+                isAttacking = false;
+            }, 500);
+
+            document.getElementById('attackSound').play();
+            if (buttonHighlighted && !attackButtonPressed) {
+                removeHighlight();
+                continueObstacleMovement();
+            }
+            attackButtonPressed = true;
+        }
     }
 }
 
+
 function createObstacle() {
-    if (gameRunning && obstacleCount < 3 && (!boss1 || boss1.style.left === '30px')) {
+    if (gameRunning && obstacleCount < 3 && !buttonHighlighted) {
         const obstacle = document.createElement('div');
         obstacle.classList.add('obstacle');
-        const color = Math.random() < 0.5 ? 'red' : 'blue';
+        let color;
+
+        if (nextObstacleIsBlue) {
+            color = 'blue';
+            nextObstacleIsBlue = false;
+            nextObstacleIsRed = true;
+        } else if (nextObstacleIsRed) {
+            color = 'red';
+            nextObstacleIsBlue = true;
+            nextObstacleIsRed = false;
+        } else {
+            color = Math.random() < 0.5 ? 'red' : 'blue';
+        }
+
         obstacle.classList.add(color);
         obstacle.setAttribute('data-color', color);
+
         if (color === 'red') {
             obstacle.style.backgroundImage = 'url("img/red_obstacle_animation.gif")';
         } else {
             obstacle.style.backgroundImage = 'url("img/tumba1.png")';
         }
+
         gameContainer.appendChild(obstacle);
+
         const gameWidth = gameContainer.offsetWidth;
         const obstacleWidth = obstacle.offsetWidth;
+
         obstacle.style.right = -(obstacleWidth) + 'px';
+
         const randomGap = Math.random() * 500 + 100;
         setTimeout(() => {
             const obstacleMoveInterval = setInterval(() => {
@@ -77,36 +116,49 @@ function createObstacle() {
                 } else {
                     obstacle.style.right = obstaclePosition + obstacleSpeed + 'px';
                     if (checkCollision(obstacle)) {
-                        if (isAttacking && obstacle.getAttribute('data-color') === 'red') {
-                            const destroyObstacle = document.createElement('div');
-                            destroyObstacle.classList.add('obstacle');
-                            destroyObstacle.style.backgroundImage = 'url("img/red_obstacle_destroy.gif")';
-                            destroyObstacle.style.position = 'absolute';
-                            destroyObstacle.style.width = obstacleWidth + 'px';
-                            destroyObstacle.style.height = obstacle.offsetHeight + 'px';
-                            destroyObstacle.style.top = obstacle.style.top;
-                            destroyObstacle.style.right = obstacle.style.right;
-                            destroyObstacle.style.zIndex = '10';
-                            gameContainer.appendChild(destroyObstacle);
-                            setTimeout(() => {
-                                destroyObstacle.remove();
-                            }, 500);
-                            obstacle.remove();
-                            clearInterval(obstacleMoveInterval);
-                            obstacleCount--;
-                            score += 1;
-                            updateScore();
-                            if (score >= 2) {
-                                startBossFight();
+                        if ((color === 'red' && firstRedObstacle) || (color === 'blue' && firstBlueObstacle)) {
+                            if (color === 'red') {
+                                highlightButton('attack-button');
+                                firstRedObstacle = false;
+                            } else {
+                                highlightButton('jump-button');
+                                firstBlueObstacle = false;
                             }
+                            clearInterval(obstacleMoveInterval);
+                            stopObstacleMovement(obstacle);
                         } else {
-                            gameOver();
+                            if (color === 'red' && isAttacking) {
+                                const destroyObstacle = document.createElement('div');
+                                destroyObstacle.classList.add('obstacle');
+                                destroyObstacle.style.backgroundImage = 'url("img/red_obstacle_destroy.gif")';
+                                destroyObstacle.style.position = 'absolute';
+                                destroyObstacle.style.width = obstacleWidth + 'px';
+                                destroyObstacle.style.height = obstacle.offsetHeight + 'px';
+                                destroyObstacle.style.top = obstacle.style.top;
+                                destroyObstacle.style.right = obstacle.style.right;
+                                destroyObstacle.style.zIndex = '10';
+                                gameContainer.appendChild(destroyObstacle);
+
+                                setTimeout(() => {
+                                    destroyObstacle.remove();
+                                }, 500);
+
+                                obstacle.remove();
+                                clearInterval(obstacleMoveInterval);
+                                obstacleCount--;
+                                score += 1;
+                                updateScore();
+                            } else {
+                                gameOver();
+                            }
                         }
                     }
                 }
             }, 20);
         }, randomGap);
+
         obstacleCount++;
+
         if (score > 0 && score % 5 === 0) {
             obstacleSpeed += 0.5;
         }
@@ -116,11 +168,6 @@ function createObstacle() {
 function checkCollision(obstacle) {
     const dinoRect = dino.getBoundingClientRect();
     const obstacleRect = obstacle.getBoundingClientRect();
-    
-    // No detectar colisiones si el mensaje del jefe está visible
-    if (bossMessageVisible) {
-        return false;
-    }
 
     return (
         dinoRect.bottom >= obstacleRect.top &&
@@ -133,12 +180,15 @@ function checkCollision(obstacle) {
 function gameOver() {
     clearInterval(gameInterval);
     gameRunning = false;
+
     const gameOverScreen = document.getElementById('game-over-screen');
     const gameOverScoreDisplay = document.getElementById('game-over-score');
     gameOverScoreDisplay.textContent = score;
     gameOverScreen.style.display = 'flex';
+
     const deadSound = document.getElementById('deadSound');
     deadSound.play();
+
     const startSound = document.getElementById('startSound');
     startSound.onplay = function() {
         if (!startSound.paused) {
@@ -146,17 +196,6 @@ function gameOver() {
             deadSound.currentTime = 0;
         }
     };
-}
-
-function resetBoss1() {
-    clearInterval(bossMoveInterval); // Limpiar el intervalo de movimiento del boss1 si existe
-    if (boss1) {
-        boss1.remove(); // Eliminar el boss1 del DOM si existe
-        boss1 = null;
-    }
-    boss1Health = 3; // Reiniciar la vida del boss1
-    bossFightActive = false;
-    bossMessageVisible = false;
 }
 
 function restartGame() {
@@ -167,98 +206,71 @@ function restartGame() {
     updateScore();
     obstacleSpeed = 5;
     obstacleCount = 0;
+    firstRedObstacle = true;
+    firstBlueObstacle = true;
     gameContainer.innerHTML = '';
-    resetBoss1(); // Reiniciar todas las variables relacionadas con el boss1
     document.getElementById('game-over-screen').style.display = 'none';
     document.getElementById('start-screen').style.display = 'flex';
+    jumpButtonPressed = false;
+    attackButtonPressed = false;
+    nextObstacleIsBlue = true; // Restablecer la secuencia de colores
+    nextObstacleIsRed = false;
 }
-
 
 function updateScore() {
     document.getElementById('score').innerText = score;
 }
 
 function moveBackground() {
-    backgroundPosition -= backgroundSpeed;
-    gameContainer.style.backgroundPositionX = backgroundPosition + 'px';
-    if (backgroundPosition <= -gameContainer.offsetWidth) {
-        backgroundPosition = 0;
+    if (!buttonHighlighted) {
+        backgroundPosition -= backgroundSpeed;
+        gameContainer.style.backgroundPositionX = backgroundPosition + 'px';
+
+        if (backgroundPosition <= -gameContainer.offsetWidth) {
+            backgroundPosition = 0;
+        }
     }
 }
 
 setInterval(moveBackground, 20);
 
-function startBossFight() {
-    if (!boss1 && score == 5) {
-        boss1 = document.createElement('div');
-        boss1.classList.add('boss1');
-        boss1.dataset.health = boss1Health;
-        boss1.style.left = 'calc(100% - 120px)';
-        boss1.style.bottom = '30px';
-        boss1.style.backgroundImage = 'url("img/raphael.gif")';
-        gameContainer.appendChild(boss1);
+function highlightButton(buttonId) {
+    document.getElementById(buttonId).classList.add('highlight');
+    buttonHighlighted = true;
 
-        boss1.style.transition = 'left 1s linear'; // Establecer la transición para el movimiento
-
-        bossMoveInterval = setInterval(() => { // Iniciar intervalo para movimiento continuo
-            if (!bossFightActive) {
-                clearInterval(bossMoveInterval);
-                return;
-            }
-
-            // Mover boss1 hacia adelante solo si no se está mostrando el mensaje
-            if (!bossMessageVisible) {
-                boss1.style.left = '30px';
-                setTimeout(() => {
-                    if (checkCollision(boss1)) {
-                        if (isAttacking) {
-                            boss1.style.backgroundImage = 'url("img/raphael_dmg.gif")'; // Cambia a la imagen de daño
-                            boss1Health--;
-                            boss1.dataset.health = boss1Health;
-                            setTimeout(() => {
-                                boss1.style.backgroundImage = 'url("img/raphael.gif")'; // Cambia de vuelta al fondo normal después de un tiempo
-                            }, 300);
-                        } else {
-                            boss1.style.backgroundImage = 'url("img/raphael_dmg.gif")'
-                            setTimeout(() => {
-                                boss1.style.backgroundImage = 'url("img/raphael.gif")';
-                            }, 300);
-                            gameOver();
-                        }
-                    } else {
-                        boss1.style.backgroundImage = 'url("img/raphael.gif")'; // Restablecer color si no hay colisión
-                    }
-                }, 1000);
-            }
-
-            // Mover boss1 hacia atrás después de 1 segundo
-            setTimeout(() => {
-                if (boss1Health <= 0) {
-                    clearInterval(bossMoveInterval);
-                    boss1.remove();
-                    boss1 = null;
-                    bossFightActive = false;
-                } else {
-                    boss1.style.left = 'calc(100% - 120px)';
-                }
-            }, 1000);
-        }, 3000); // aca manejas el retraso para que vuelva a iniciar el loop
-
-        // Mostrar el mensaje del boss1
-        bossFightActive = true;
-        bossMessageVisible = true;
-        const bossMessage = document.getElementById('boss-message');
-        bossMessage.style.display = 'block';
-
-        // Detener el juego
-        gameRunning = false;
+    // Mostrar el popup con el mensaje adecuado
+    const popup = document.getElementById('popup');
+    const popupMessage = document.getElementById('popup-message');
+    if (buttonId === 'jump-button') {
+        popupMessage.textContent = 'You must jump the graves';
+    } else if (buttonId === 'attack-button') {
+        popupMessage.textContent = 'Attack the ghost to reap his soul';
     }
+    popup.style.display = 'block';
 }
 
-document.getElementById('continue-button').addEventListener('click', function() {
-    const bossMessage = document.getElementById('boss-message');
-    bossMessage.style.display = 'none';
-    bossMessageVisible = false;
-    gameRunning = true;
-});
+function removeHighlight() {
+    document.querySelectorAll('.action-button').forEach(button => {
+        button.classList.remove('highlight');
+    });
+    buttonHighlighted = false;
 
+    // Ocultar el popup
+    const popup = document.getElementById('popup');
+    popup.style.display = 'none';
+}
+
+function stopObstacleMovement(obstacle) {
+    const stopPosition = parseInt(obstacle.style.right) + 5;
+    obstacle.style.right = stopPosition + 'px';
+    obstacle.style.animationPlayState = 'paused';
+}
+
+function continueObstacleMovement() {
+    const obstacles = document.querySelectorAll('.obstacle');
+    obstacles.forEach(obstacle => {
+        if (parseInt(obstacle.style.right) >= 5) {
+            obstacle.remove();
+        }
+    });
+}
